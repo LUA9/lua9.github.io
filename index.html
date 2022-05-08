@@ -1,0 +1,21 @@
+<head>
+    <title>INDEX</title>
+</head> 
+
+<script type="text/javascript">
+    function redirect(type) {
+        var length = document.getElementById('length_input').value;
+        if (type === 'NUMBER') {
+            window.location.href = `/generate?number=true&length=${length}`;
+        }
+        else if (type === 'NO NUMBER') {
+            window.location.href = `/generate?number=false&length=${length}`;
+        }
+    }
+</script>
+
+<p>
+    <input type="number" id="length_input" value="3"/>
+</p>
+<button onclick="redirect('NUMBER')">NUMBER</button>
+<button onclick="redirect('NO NUMBER')">NO NUMBER</button>
