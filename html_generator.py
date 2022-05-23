@@ -32,6 +32,9 @@ with open(name + '.html', 'w+', encoding='utf-8') as file:
     lines.append('<p>\n\t<h1>%s</h1>\n</p>'%name)
     print('Done Initializing')
     for index, line in enumerate(document_lines, 1):
+        if '[]END' in line:
+            print('[]END is detected. Close task')
+            break
         if not line:
             print('Empty: Line {}'.format(index))
             print('Empty line detected, skip')
