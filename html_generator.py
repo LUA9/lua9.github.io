@@ -27,16 +27,24 @@ if not document_lines:
 
 with open(name + '.html', 'w+', encoding='utf-8') as file:
     lines = []
+    print('Initializing lines')
     lines.append('<head>\n\t<title>%s</title>\n</head>'%name)
     lines.append('<p>\n\t<h1>%s</h1>\n</p>'%name)
-    for line in document_lines:
+    print('Done Initializing')
+    for index, line in enumerate(document_lines, 1):
         if not line:
+            print('Empty: Line {}'.format(index))
+            print('Empty line detected, skip')
             continue
         if line.startswith('*'):
+            print('Write: Line {}'.format(index))
             lines.append('<p>\n\t<h2>%s</h2>\n</p>'%line)  
         elif line.startswith('ㄴ'):
+            print('Write: Line {}'.format(index))
             lines.append('<p>\n\t<h3>%s</h3>\n</p>'%line)
         else:
+            print('Write: Line {}'.format(index))
+            print('No type detected for this line, use strong tag instead automatically.')
             lines.append('<p>\n\t<strong>%s</strong>\n</p>'%line)
 
     if not lines:
@@ -46,4 +54,5 @@ with open(name + '.html', 'w+', encoding='utf-8') as file:
     file.write(text)
 
 file.close()
+print('Done')
 exit(0)
