@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 # mypy: ignore-errors
 
-import argparse
-from io import open
+from time import time
+from argparse import ArgumentParser
 
-parser = argparse.ArgumentParser()
+start = time()
+
+parser = ArgumentParser(usage='python -m 생성기 <>문서 <>문서 이름')
 parser.add_argument('document')
 parser.add_argument('name')
 
@@ -12,50 +14,52 @@ arguments = parser.parse_args()
 document = arguments.document
 name = arguments.name
 
-try:
-    with open(document, 'r+', encoding='utf-8') as file:
-        content = file.read()
-except:
-    print('Error while opening file')
-    exit(2)
+with open(document, 'r+', encoding='UTF-8') as file:
+    content = file.read()
 
-document_lines = content.splitlines()
+lines = content.splitlines()
 
-if not document_lines:
-    print('Empty lines')
-    exit(1)
+if not lines:
+    raise ValueError('Empty file')
 
-with open(name + '.html', 'w+', encoding='utf-8') as file:
-    lines = []
-    print('Initializing lines')
-    lines.append('<head>\n\t<title>%s</title>\n</head>'%name)
-    lines.append('<p>\n\t<h1>%s</h1>\n</p>'%name)
-    print('Done Initializing')
-    for index, line in enumerate(document_lines, 1):
-        if '[]END' in line:
-            print('[]END is detected. Close task')
-            break
+with open(name + '.html', 'w+', encoding='UTF-8') as file:
+    result_lines = list()
+    result_lines.append('<head>\n\t<title>%s</title>\n</head>'%name)
+    result_lines.append('<p>\n\t<h1>%s</h1>\n</p>'%name)
+
+    for index, line in enumerate(lines, 1):
+        line = line.lstrip().rstrip()
         if not line:
-            print('Empty: Line {}'.format(index))
-            print('Empty line detected, skip')
+            print('Empty: Line %d'%index)
             continue
+
+        if '[]END' in line:
+            print('END: Line %d'%index)
+            break
+
         if line.startswith('*'):
-            print('Write: Line {}'.format(index))
-            lines.append('<p>\n\t<h2>%s</h2>\n</p>'%line)  
+            print('Write: Line %d'%index)
+            result_lines.append('<p>\n\t<h2>%s</h2>\n</p>'%line)
+
         elif line.startswith('ㄴ'):
-            print('Write: Line {}'.format(index))
-            lines.append('<p>\n\t<h3>%s</h3>\n</p>'%line)
+            print('Write: Line %d'%index)
+            result_lines.append('<p>\n\t<h3>%s</h3>\n</p>'%line)
+
+        elif line.startswith('자료:'):
+            result_lines.append('<p>\n\t<div>%s</div>\n</p>'%line)
+
         else:
-            print('Write: Line {}'.format(index))
-            print('No type detected for this line, use strong tag instead automatically.')
-            lines.append('<p>\n\t<strong>%s</strong>\n</p>'%line)
+            print('Write: Line %d'%index)
+            result_lines.append('<p>\n\t<strong>%s</strong>\n</p>'%line)
 
     if not lines:
-        print('Empty lines')
-        exit(1)
-    text = '\n'.join(lines)
+        raise ValueError('Empty lines')
+
+    text = '\n'.join(result_lines)
     file.write(text)
 
 file.close()
-print('Done')
+
+end = time()
+print('Done: {} seconds'.format(end - start))
 exit(0)
