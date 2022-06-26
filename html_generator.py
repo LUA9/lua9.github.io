@@ -1,65 +1,57 @@
 # -*- coding: utf-8 -*-
 # mypy: ignore-errors
 
-from time import time
+# 코드 정리를 안 해서 코드가 엉망입니다.
+# 더욱 빠른 코드를 위해서는 pypy를 이용해주시기 바랍니다.
+
 from argparse import ArgumentParser
+from contextlib import closing
 
-start = time()
+def clean(string):
+    return string.rstrip().lstrip()
 
-parser = ArgumentParser(usage='python -m 생성기 <>문서 <>문서 이름')
-parser.add_argument('document')
+parser = ArgumentParser(usage='python -m html_generator <이름> <파일 위치>')
 parser.add_argument('name')
+parser.add_argument('location')
 
 arguments = parser.parse_args()
-document = arguments.document
-name = arguments.name
 
-with open(document, 'r+', encoding='UTF-8') as file:
-    content = file.read()
+with closing(open(arguments.location, 'r', encoding='UTF-8')) as document_file:
+    content = document_file.read()
 
 lines = content.splitlines()
 
 if not lines:
-    raise ValueError('Empty file')
+    raise ValueError('파일이 비었습니다.')
 
-with open(name + '.html', 'w+', encoding='UTF-8') as file:
-    result_lines = list()
-    result_lines.append('<head>\n\t<title>%s</title>\n</head>'%name)
-    result_lines.append('<p>\n\t<h1>%s</h1>\n</p>'%name)
+with closing(open(arguments.name + '.html', 'w', encoding='UTF-8')) as file:
+    result_lines = []
+    result_lines.append(f'<head>\n\t<title>{arguments.name}</title>\n</head>')
+    result_lines.append(f'<p>\n\t<h1>{arguments.name}</h1>\n</p>')
 
     for index, line in enumerate(lines, 1):
-        line = line.lstrip().rstrip()
+        line = clean(line)
         if not line:
-            print('Empty: Line %d'%index)
             continue
 
-        if '[]END' in line:
-            print('END: Line %d'%index)
-            break
+        print(f'{index}번째 줄 작성 중...')
 
         if line.startswith('*'):
-            print('Write: Line %d'%index)
-            result_lines.append('<p>\n\t<h2>%s</h2>\n</p>'%line)
+            result_lines.append(f'<p>\n\t<h2>{line}</h2>\n</p>')
 
         elif line.startswith('ㄴ'):
-            print('Write: Line %d'%index)
-            result_lines.append('<p>\n\t<h3>%s</h3>\n</p>'%line)
+            result_lines.append(f'<p>\n\t<h3>{line}</h3>\n</p>')
 
         elif line.startswith('자료:'):
-            result_lines.append('<p>\n\t<div>%s</div>\n</p>'%line)
+            result_lines.append(f'<p>\n\t<div>{line}</div>\n</p>')
 
         else:
-            print('Write: Line %d'%index)
-            result_lines.append('<p>\n\t<strong>%s</strong>\n</p>'%line)
+            result_lines.append(f'<p>\n\t<strong>{line}</strong>\n</p>')
 
     if not lines:
-        raise ValueError('Empty lines')
+        raise ValueError('알 수 없는 오류가 발생 했습니다.')
 
     text = '\n'.join(result_lines)
     file.write(text)
 
-file.close()
-
-end = time()
-print('Done: {} seconds'.format(end - start))
 exit(0)
